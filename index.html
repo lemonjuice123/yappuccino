@@ -1,186 +1,218 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>~/portfolio</title>
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;600&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.0/lucide.min.js"></script>
+    <title>3D Driftable Car</title>
     <style>
-        :root {
-            --bg-primary: #050510;  /* Even darker purple-black background */
-            --text-primary: #6A5ACD;  /* Lavender text color */
-            --text-secondary: #9370DB;  /* Medium purple text */
-            --accent-color: #6A5ACD;  /* Slate blue accent */
-            --tile-bg: rgba(15, 15, 35, 0.9);  /* Darker purple tile background */
-            --tile-border: rgba(106, 90, 205, 0.5);  /* Purple border */
-        }
-        body {
-            background-color: var(--bg-primary);
-            font-family: 'Fira Code', monospace;
-            height: 100vh;
-            margin: 0;
-            overflow: hidden;
-            color: var(--text-secondary);
-        }
-        .grid-container {
-            display: grid;
-            grid-template-columns: 44px 1fr 300px;  /* Reduced left column width to 44px */
-            grid-template-rows: 1fr 1fr;
-            gap: 8px;
-            height: 100vh;
-            padding: 8px;
-            box-sizing: border-box;
-        }
-        .tile {
-            background-color: var(--tile-bg);
-            border: 1px solid var(--tile-border);
-            border-radius: 4px;
-            backdrop-filter: blur(10px);
-            overflow: hidden;
-            color: var(--text-secondary);
-        }
-        .menu-tile {
-            grid-row: span 2;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding-top: 16px;
-            gap: 16px;
-        }
-        .menu-icon {
-            color: var(--text-secondary);
-            opacity: 0.7;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            padding: 2px;  /* Minimal padding */
-        }
-        .menu-icon svg {
-            stroke: var(--text-secondary);
-            width: 28px;  /* Slightly smaller icons */
-            height: 28px;
-        }
-        .menu-icon:hover {
-            opacity: 1;
-            transform: scale(1.1);
-        }
-        .main-content {
-            grid-column: 2;
-            grid-row: span 2;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            padding: 24px;
-        }
-        .synthwave-graph {
-            position: relative;
-            overflow: hidden;
-        }
-        .synthwave-graph svg {
+        body { margin: 0; }
+        canvas { display: block; }
+        #instructions {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: Arial, sans-serif;
         }
     </style>
 </head>
 <body>
-    <div class="grid-container">
-        <!-- Menu Tile (Left) -->
-        <div class="tile menu-tile">
-            <div class="menu-icon" title="Home">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                    <polyline points="9 22 9 12 15 12 15 22"/>
-                </svg>
-            </div>
-            <div class="menu-icon" title="Projects">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.293a1 1 0 0 1-.707-.293l-1.414-1.414A1 1 0 0 0 10.586 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2Z"/>
-                </svg>
-            </div>
-            <div class="menu-icon" title="Code">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="16 18 22 12 16 6"/>
-                    <polyline points="8 6 2 12 8 18"/>
-                </svg>
-            </div>
-            <div class="menu-icon" title="Contact">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="2" y="4" width="20" height="16" rx="2"/>
-                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
-                </svg>
-            </div>
-        </div>
-
-        <!-- Main Content Tile (Middle) -->
-        <div class="tile main-content">
-            <div class="text-xl mb-4">
-                <span>guest@portfolio</span>:<span>~</span>$ whoami
-            </div>
-            
-            <h1 class="text-4xl font-bold mb-6">
-                [YOUR_NAME]
-            </h1>
-            
-            <section class="mb-6">
-                <div class="text-xl font-semibold mb-3">
-                    > Projects
-                </div>
-                <div class="space-y-3">
-                    <div class="bg-purple-900/20 p-3 rounded hover:bg-purple-900/40 transition-all duration-300">
-                        <div class="flex items-center">
-                            <span class="text-accent-color mr-2">▶</span>
-                            <span class="font-medium">[PROJECT_1_NAME]</span>
-                            <span class="text-purple-300 ml-2">// short description</span>
-                        </div>
-                    </div>
-                    <div class="bg-purple-900/20 p-3 rounded hover:bg-purple-900/40 transition-all duration-300">
-                        <div class="flex items-center">
-                            <span class="text-accent-color mr-2">▶</span>
-                            <span class="font-medium">[PROJECT_2_NAME]</span>
-                            <span class="text-purple-300 ml-2">// short description</span>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </div>
-
-        <!-- Synthwave Graph Tile (Top Right) -->
-        <div class="tile synthwave-graph">
-            <div class="text-xl font-semibold mb-2 p-2">
-                > Synthwave
-            </div>
-            <svg viewBox="0 0 300 100">
-                <path d="M0 50 Q 75 20, 150 50 T 300 50" 
-                      fill="none" 
-                      stroke="url(#synthwave-gradient)" 
-                      stroke-width="3"/>
-                <defs>
-                    <linearGradient id="synthwave-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" style="stop-color:#6A5ACD;stop-opacity:1" />
-                        <stop offset="100%" style="stop-color:#483D8B;stop-opacity:1" />
-                    </linearGradient>
-                </defs>
-            </svg>
-        </div>
-
-        <!-- Console Log Tile (Bottom Right) -->
-        <div class="tile">
-            <div class="text-xl font-semibold mb-2 p-2">
-                > Console Output
-            </div>
-            <pre class="text-sm p-2 overflow-auto"><code>
-$ python3 portfolio_status.py
-[*] Scanning projects...
-[✓] Project 1: Active
-[✓] Project 2: In Development
-[*] Skills: Python, JavaScript, React
-[*] Current Focus: Full Stack Development
-            </code></pre>
-        </div>
+    <div id="instructions">
+        Controls:<br>
+        W - Accelerate<br>
+        S - Brake/Reverse<br>
+        A/D - Turn<br>
+        SPACE - Handbrake (for drifting)
     </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Create ground with grip zones
+        const groundGeometry = new THREE.PlaneGeometry(100, 100);
+        const groundMaterial = new THREE.MeshBasicMaterial({ 
+            color: 0x404040,
+            side: THREE.DoubleSide
+        });
+        const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+        ground.rotation.x = Math.PI / 2;
+        scene.add(ground);
+
+        // Create car body with improved visuals
+        const carBody = new THREE.Group();
+        
+        // Main body
+        const bodyGeometry = new THREE.BoxGeometry(2, 1, 4);
+        const bodyMaterial = new THREE.MeshBasicMaterial({ color: 0x3333ff });
+        const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+        body.position.y = 0.5;
+        carBody.add(body);
+
+        // Add roof for better visuals
+        const roofGeometry = new THREE.BoxGeometry(1.8, 0.8, 2);
+        const roofMaterial = new THREE.MeshBasicMaterial({ color: 0x2222dd });
+        const roof = new THREE.Mesh(roofGeometry, roofMaterial);
+        roof.position.y = 1.4;
+        roof.position.z = -0.3;
+        carBody.add(roof);
+
+        // Wheels
+        const wheelGeometry = new THREE.CylinderGeometry(0.4, 0.4, 0.4, 32);
+        const wheelMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+        
+        const wheels = [];
+        const wheelPositions = [
+            [-1.2, 0.4, 1],  // Front Left
+            [1.2, 0.4, 1],   // Front Right
+            [-1.2, 0.4, -1], // Back Left
+            [1.2, 0.4, -1]   // Back Right
+        ];
+
+        wheelPositions.forEach(position => {
+            const wheel = new THREE.Mesh(wheelGeometry, wheelMaterial);
+            wheel.rotation.z = Math.PI / 2;
+            wheel.position.set(...position);
+            wheels.push(wheel);
+            carBody.add(wheel);
+        });
+
+        scene.add(carBody);
+
+        // Enhanced car physics properties
+        const car = {
+            velocity: new THREE.Vector2(0, 0),
+            position: new THREE.Vector3(0, 0, 0),
+            rotation: 0,
+            angularVelocity: 0,
+            grip: 0.95,
+            driftGrip: 0.4,
+            acceleration: 0.015,
+            maxSpeed: 0.8,
+            turnSpeed: 0.04,
+            driftingEnabled: false,
+            isHandbrakeActive: false
+        };
+
+        // Camera setup
+        camera.position.set(0, 10, 20);
+        camera.lookAt(carBody.position);
+
+        // Controls with WASD
+        const keys = {
+            w: false,
+            s: false,
+            a: false,
+            d: false,
+            ' ': false  // Space for handbrake
+        };
+
+        window.addEventListener('keydown', (e) => {
+            if (keys.hasOwnProperty(e.key.toLowerCase())) {
+                keys[e.key.toLowerCase()] = true;
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            if (keys.hasOwnProperty(e.key.toLowerCase())) {
+                keys[e.key.toLowerCase()] = false;
+            }
+        });
+
+        function updateCarPhysics() {
+            // Handle acceleration
+            const forwardVector = new THREE.Vector2(
+                Math.sin(car.rotation),
+                Math.cos(car.rotation)
+            );
+
+            // Apply handbrake
+            car.isHandbrakeActive = keys[' '];
+            const currentGrip = car.isHandbrakeActive ? car.driftGrip : car.grip;
+
+            // Forward/Backward movement
+            if (keys.w) {
+                car.velocity.x += forwardVector.x * car.acceleration;
+                car.velocity.y += forwardVector.y * car.acceleration;
+            } else if (keys.s) {
+                car.velocity.x -= forwardVector.x * car.acceleration * 0.5;
+                car.velocity.y -= forwardVector.y * car.acceleration * 0.5;
+            }
+
+            // Limit speed
+            const speed = car.velocity.length();
+            if (speed > car.maxSpeed) {
+                car.velocity.multiplyScalar(car.maxSpeed / speed);
+            }
+
+            // Apply grip and drag
+            car.velocity.multiplyScalar(currentGrip);
+
+            // Handle turning with drift mechanics
+            const turnAmount = (keys.a ? 1 : 0) - (keys.d ? 1 : 0);
+            
+            if (speed > 0.1) {
+                // Calculate drift factor based on handbrake and speed
+                const driftFactor = car.isHandbrakeActive ? 2.5 : 1.0;
+                car.angularVelocity += turnAmount * car.turnSpeed * driftFactor * (speed / car.maxSpeed);
+            }
+
+            // Apply angular friction
+            car.angularVelocity *= 0.95;
+            car.rotation += car.angularVelocity;
+
+            // Update position
+            car.position.x += car.velocity.x;
+            car.position.z += car.velocity.y;
+
+            // Visualize drift with wheel rotation
+            wheels.forEach((wheel, index) => {
+                wheel.rotation.x += speed * 0.5;
+                if (index < 2) { // Front wheels
+                    wheel.rotation.y = turnAmount * 0.5;
+                }
+            });
+
+            // Update car body position and rotation
+            carBody.position.set(car.position.x, 0, car.position.z);
+            carBody.rotation.y = car.rotation;
+
+            // Update camera with smooth follow
+            const cameraDistance = 20;
+            const cameraHeight = 10;
+            const lookAheadDistance = 5;
+
+            camera.position.x = carBody.position.x + Math.sin(car.rotation) * -cameraDistance;
+            camera.position.z = carBody.position.z + Math.cos(car.rotation) * -cameraDistance;
+            camera.position.y = cameraHeight;
+
+            const lookAtPos = new THREE.Vector3(
+                carBody.position.x + Math.sin(car.rotation) * lookAheadDistance,
+                0,
+                carBody.position.z + Math.cos(car.rotation) * lookAheadDistance
+            );
+            camera.lookAt(lookAtPos);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            updateCarPhysics();
+            renderer.render(scene, camera);
+        }
+
+        window.addEventListener('resize', onWindowResize, false);
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        animate();
+    </script>
 </body>
 </html>
