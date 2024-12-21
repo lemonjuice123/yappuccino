@@ -29,48 +29,49 @@
     <script>
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer();
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        // Create ground with grip zones
-        const groundGeometry = new THREE.PlaneGeometry(100, 100);
+        // Improved ground with grid for better speed perception
+        const groundGeometry = new THREE.PlaneGeometry(200, 200, 40, 40);
         const groundMaterial = new THREE.MeshBasicMaterial({ 
             color: 0x404040,
+            wireframe: true,
             side: THREE.DoubleSide
         });
         const ground = new THREE.Mesh(groundGeometry, groundMaterial);
         ground.rotation.x = Math.PI / 2;
         scene.add(ground);
 
-        // Create car body with improved visuals
+        // Enhanced car body
         const carBody = new THREE.Group();
         
-        // Main body
-        const bodyGeometry = new THREE.BoxGeometry(2, 1, 4);
+        // Main body with better proportions
+        const bodyGeometry = new THREE.BoxGeometry(1.8, 0.8, 4);
         const bodyMaterial = new THREE.MeshBasicMaterial({ color: 0x3333ff });
         const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
         body.position.y = 0.5;
         carBody.add(body);
 
-        // Add roof for better visuals
-        const roofGeometry = new THREE.BoxGeometry(1.8, 0.8, 2);
+        // Sleeker roof
+        const roofGeometry = new THREE.BoxGeometry(1.6, 0.6, 2.2);
         const roofMaterial = new THREE.MeshBasicMaterial({ color: 0x2222dd });
         const roof = new THREE.Mesh(roofGeometry, roofMaterial);
-        roof.position.y = 1.4;
-        roof.position.z = -0.3;
+        roof.position.y = 1.2;
+        roof.position.z = -0.2;
         carBody.add(roof);
 
-        // Wheels
-        const wheelGeometry = new THREE.CylinderGeometry(0.4, 0.4, 0.4, 32);
-        const wheelMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+        // Improved wheels
+        const wheelGeometry = new THREE.CylinderGeometry(0.4, 0.4, 0.3, 32);
+        const wheelMaterial = new THREE.MeshBasicMaterial({ color: 0x111111 });
         
         const wheels = [];
         const wheelPositions = [
-            [-1.2, 0.4, 1],  // Front Left
-            [1.2, 0.4, 1],   // Front Right
-            [-1.2, 0.4, -1], // Back Left
-            [1.2, 0.4, -1]   // Back Right
+            [-0.9, 0.4, 1.3],   // Front Left
+            [0.9, 0.4, 1.3],    // Front Right
+            [-0.9, 0.4, -1.3],  // Back Left
+            [0.9, 0.4, -1.3]    // Back Right
         ];
 
         wheelPositions.forEach(position => {
@@ -83,32 +84,41 @@
 
         scene.add(carBody);
 
-        // Enhanced car physics properties
+        // Refined physics properties
         const car = {
             velocity: new THREE.Vector2(0, 0),
             position: new THREE.Vector3(0, 0, 0),
             rotation: 0,
             angularVelocity: 0,
-            grip: 0.95,
-            driftGrip: 0.4,
-            acceleration: 0.015,
-            maxSpeed: 0.8,
-            turnSpeed: 0.04,
-            driftingEnabled: false,
-            isHandbrakeActive: false
+            grip: 0.98,            // Increased base grip
+            driftGrip: 0.85,       // Less extreme drift
+            acceleration: 0.008,    // Smoother acceleration
+            deceleration: 0.995,   // Gradual slowdown
+            maxSpeed: 0.6,         // Balanced top speed
+            turnSpeed: 0.028,      // More controlled turning
+            driftIntensity: 1.2,   // Drift multiplier
+            handling: 0.92         // Overall stability
         };
 
-        // Camera setup
-        camera.position.set(0, 10, 20);
-        camera.lookAt(carBody.position);
+        // Dynamic camera properties
+        const cameraSettings = {
+            distance: 15,
+            height: 6,
+            lookAheadDistance: 6,
+            smoothing: 0.1,
+            currentPos: new THREE.Vector3(),
+            targetPos: new THREE.Vector3(),
+            lookAtPos: new THREE.Vector3(),
+            lookAtTarget: new THREE.Vector3()
+        };
 
-        // Controls with WASD
+        // Controls
         const keys = {
             w: false,
             s: false,
             a: false,
             d: false,
-            ' ': false  // Space for handbrake
+            ' ': false
         };
 
         window.addEventListener('keydown', (e) => {
@@ -124,83 +134,107 @@
         });
 
         function updateCarPhysics() {
-            // Handle acceleration
+            // Get forward direction
             const forwardVector = new THREE.Vector2(
                 Math.sin(car.rotation),
                 Math.cos(car.rotation)
             );
 
-            // Apply handbrake
-            car.isHandbrakeActive = keys[' '];
-            const currentGrip = car.isHandbrakeActive ? car.driftGrip : car.grip;
-
-            // Forward/Backward movement
+            // Improved acceleration
             if (keys.w) {
                 car.velocity.x += forwardVector.x * car.acceleration;
                 car.velocity.y += forwardVector.y * car.acceleration;
             } else if (keys.s) {
-                car.velocity.x -= forwardVector.x * car.acceleration * 0.5;
-                car.velocity.y -= forwardVector.y * car.acceleration * 0.5;
+                car.velocity.x -= forwardVector.x * car.acceleration * 0.7;
+                car.velocity.y -= forwardVector.y * car.acceleration * 0.7;
             }
 
-            // Limit speed
+            // Natural deceleration
+            car.velocity.multiplyScalar(car.deceleration);
+
+            // Speed calculations
             const speed = car.velocity.length();
+            const speedRatio = speed / car.maxSpeed;
+
+            // Speed limiting with smooth cutoff
             if (speed > car.maxSpeed) {
-                car.velocity.multiplyScalar(car.maxSpeed / speed);
+                const reduction = 1 - (speed - car.maxSpeed) / speed;
+                car.velocity.multiplyScalar(reduction);
             }
 
-            // Apply grip and drag
-            car.velocity.multiplyScalar(currentGrip);
-
-            // Handle turning with drift mechanics
-            const turnAmount = (keys.a ? 1 : 0) - (keys.d ? 1 : 0);
+            // Enhanced drift mechanics
+            const isHandbrake = keys[' '];
+            const currentGrip = isHandbrake ? car.driftGrip : car.grip;
             
-            if (speed > 0.1) {
-                // Calculate drift factor based on handbrake and speed
-                const driftFactor = car.isHandbrakeActive ? 2.5 : 1.0;
-                car.angularVelocity += turnAmount * car.turnSpeed * driftFactor * (speed / car.maxSpeed);
+            // Progressive turning based on speed
+            const turnAmount = (keys.a ? 1 : 0) - (keys.d ? 1 : 0);
+            if (speed > 0.01) {
+                const turnMultiplier = isHandbrake ? car.driftIntensity : 1;
+                const speedFactor = THREE.MathUtils.lerp(0.5, 1, speedRatio);
+                car.angularVelocity += turnAmount * car.turnSpeed * turnMultiplier * speedFactor;
             }
 
-            // Apply angular friction
-            car.angularVelocity *= 0.95;
+            // Apply grip and handling
+            car.velocity.multiplyScalar(currentGrip);
+            car.angularVelocity *= car.handling;
             car.rotation += car.angularVelocity;
 
             // Update position
             car.position.x += car.velocity.x;
             car.position.z += car.velocity.y;
 
-            // Visualize drift with wheel rotation
+            // Wheel animations
             wheels.forEach((wheel, index) => {
-                wheel.rotation.x += speed * 0.5;
+                wheel.rotation.x += speed;
                 if (index < 2) { // Front wheels
-                    wheel.rotation.y = turnAmount * 0.5;
+                    wheel.rotation.y = turnAmount * 0.3;
                 }
             });
 
-            // Update car body position and rotation
+            // Update car position and rotation
             carBody.position.set(car.position.x, 0, car.position.z);
             carBody.rotation.y = car.rotation;
+        }
 
-            // Update camera with smooth follow
-            const cameraDistance = 20;
-            const cameraHeight = 10;
-            const lookAheadDistance = 5;
-
-            camera.position.x = carBody.position.x + Math.sin(car.rotation) * -cameraDistance;
-            camera.position.z = carBody.position.z + Math.cos(car.rotation) * -cameraDistance;
-            camera.position.y = cameraHeight;
-
-            const lookAtPos = new THREE.Vector3(
-                carBody.position.x + Math.sin(car.rotation) * lookAheadDistance,
-                0,
-                carBody.position.z + Math.cos(car.rotation) * lookAheadDistance
+        function updateCamera() {
+            // Calculate ideal camera position
+            const idealOffset = new THREE.Vector3(
+                Math.sin(car.rotation) * -cameraSettings.distance,
+                cameraSettings.height,
+                Math.cos(car.rotation) * -cameraSettings.distance
             );
-            camera.lookAt(lookAtPos);
+
+            // Calculate target camera position with speed-based adjustments
+            const speed = car.velocity.length();
+            const speedFactor = speed / car.maxSpeed;
+            
+            cameraSettings.targetPos.set(
+                car.position.x + idealOffset.x,
+                idealOffset.y + speedFactor * 2, // Camera raises slightly at speed
+                car.position.z + idealOffset.z
+            );
+
+            // Smooth camera position
+            cameraSettings.currentPos.lerp(cameraSettings.targetPos, cameraSettings.smoothing);
+            camera.position.copy(cameraSettings.currentPos);
+
+            // Dynamic look-ahead based on speed and drift
+            const lookAheadDist = cameraSettings.lookAheadDistance * (1 + speedFactor);
+            cameraSettings.lookAtTarget.set(
+                car.position.x + Math.sin(car.rotation) * lookAheadDist,
+                0,
+                car.position.z + Math.cos(car.rotation) * lookAheadDist
+            );
+
+            // Smooth look-at position
+            cameraSettings.lookAtPos.lerp(cameraSettings.lookAtTarget, cameraSettings.smoothing);
+            camera.lookAt(cameraSettings.lookAtPos);
         }
 
         function animate() {
             requestAnimationFrame(animate);
             updateCarPhysics();
+            updateCamera();
             renderer.render(scene, camera);
         }
 
