@@ -1,138 +1,39 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>3D Model Viewer</title>
-    <style>
-        body { margin: 0; }
-        canvas { display: block; }
-        #loading {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-family: Arial, sans-serif;
-            font-size: 20px;
-            display: none;
-        }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Assistant Interface</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div id="loading">Loading 3D Model...</div>
-    <script async src="https://unpkg.com/es-module-shims@1.8.0/dist/es-module-shims.js"></script>
-    <script type="importmap">
-    {
-        "imports": {
-            "three": "https://unpkg.com/three@0.157.0/build/three.module.js",
-            "three/addons/": "https://unpkg.com/three@0.157.0/examples/jsm/"
-        }
-    }
-    </script>
-    <script type="module">
-        import * as THREE from 'three';
-        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+    <header>
+        <nav>
+            <div class="logo">Your Logo</div>
+            <ul>
+                <li><a href="#">Home</a></li>
+                <li><a href="#">About</a></li>
+                <li><a href="#">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
 
-        // Scene setup
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
+    <main>
+        <section class="chat-container">
+            <div class="chat-history" id="chatHistory">
+                <!-- Chat messages will be dynamically added here -->
+            </div>
+            <div class="input-area">
+                <textarea id="userInput" placeholder="Ask me anything..."></textarea>
+                <button id="sendButton">Send</button>
+            </div>
+        </section>
+    </main>
 
-        // Lighting
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-        scene.add(ambientLight);
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-        directionalLight.position.set(5, 5, 5);
-        scene.add(directionalLight);
+    <footer>
+        <p>&copy; 2025 Your AI Assistant. All rights reserved.</p>
+    </footer>
 
-        // Camera position
-        camera.position.z = 5;
-
-        // Variables for rotation control
-        let model;
-        let isMouseDown = false;
-        let mouseX = 0;
-        let mouseY = 0;
-
-        // Load 3D model
-        const loader = new GLTFLoader();
-        document.getElementById('loading').style.display = 'block';
-        
-        loader.load(
-            'main3d.glb',
-            function (gltf) {
-                model = gltf.scene;
-                scene.add(model);
-                document.getElementById('loading').style.display = 'none';
-                
-                // Center and scale the model
-                const box = new THREE.Box3().setFromObject(model);
-                const center = box.getCenter(new THREE.Vector3());
-                const size = box.getSize(new THREE.Vector3());
-                const maxDim = Math.max(size.x, size.y, size.z);
-                const scale = 2 / maxDim;
-                model.scale.setScalar(scale);
-                model.position.sub(center.multiplyScalar(scale));
-            },
-            function (xhr) {
-                console.log((xhr.loaded / xhr.total * 100) + '% loaded');
-            },
-            function (error) {
-                console.error('An error occurred loading the model:', error);
-                document.getElementById('loading').textContent = 'Error loading model';
-            }
-        );
-
-        // Mouse event listeners
-        document.addEventListener('mousedown', onMouseDown);
-        document.addEventListener('mouseup', onMouseUp);
-        document.addEventListener('mousemove', onMouseMove);
-
-        function onMouseDown(event) {
-            isMouseDown = true;
-            mouseX = event.clientX;
-            mouseY = event.clientY;
-        }
-
-        function onMouseUp() {
-            isMouseDown = false;
-        }
-
-        function onMouseMove(event) {
-            if (isMouseDown && model) {
-                const deltaX = event.clientX - mouseX;
-                const deltaY = event.clientY - mouseY;
-                
-                model.rotation.y += deltaX * 0.01;
-                model.rotation.x += deltaY * 0.01;
-                
-                mouseX = event.clientX;
-                mouseY = event.clientY;
-            }
-        }
-
-        // Handle window resize
-        window.addEventListener('resize', onWindowResize, false);
-
-        function onWindowResize() {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        }
-
-        // Animation loop
-        let autoRotate = true;
-        function animate() {
-            requestAnimationFrame(animate);
-            
-            if (model && !isMouseDown && autoRotate) {
-                model.rotation.y += 0.01;
-            }
-            
-            renderer.render(scene, camera);
-        }
-
-        animate();
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
