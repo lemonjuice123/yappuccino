@@ -1,7 +1,5 @@
-const openai = new OpenAI({
-    apiKey: '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',
-    baseURL: 'https://api.deepseek.com'
-});
+const API_KEY = 'YOUR_OPENROUTER_API_KEY';
+const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
 const chatMessages = document.getElementById('chatMessages');
 const userInput = document.getElementById('userInput');
@@ -22,15 +20,27 @@ async function sendMessage() {
         userInput.value = '';
 
         try {
-            const response = await openai.chat.completions.create({
-                model: 'deepseek-chat',
-                messages: [
-                    { role: 'system', content: 'You are a helpful assistant.' },
-                    { role: 'user', content: message }
-                ],
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${API_KEY}`
+                },
+                body: JSON.stringify({
+                    model: 'deepseek/deepseek-chat-33b',
+                    messages: [
+                        { role: 'system', content: 'You are a helpful assistant.' },
+                        { role: 'user', content: message }
+                    ]
+                })
             });
 
-            const aiResponse = response.choices[0].message.content;
+            if (!response.ok) {
+                throw new Error('API request failed');
+            }
+
+            const data = await response.json();
+            const aiResponse = data.choices[0].message.content;
             addMessage(aiResponse, 'ai-message');
         } catch (error) {
             console.error('Error:', error);
