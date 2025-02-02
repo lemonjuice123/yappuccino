@@ -3,37 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Assistant Interface</title>
+    <title>DeepSeek Chat Interface</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <header>
-        <nav>
-            <div class="logo">Your Logo</div>
-            <ul>
-                <li><a href="#">Home</a></li>
-                <li><a href="#">About</a></li>
-                <li><a href="#">Contact</a></li>
-            </ul>
-        </nav>
-    </header>
-
-    <main>
-        <section class="chat-container">
-            <div class="chat-history" id="chatHistory">
-                <!-- Chat messages will be dynamically added here -->
-            </div>
-            <div class="input-area">
-                <textarea id="userInput" placeholder="Ask me anything..."></textarea>
-                <button id="sendButton">Send</button>
-            </div>
-        </section>
-    </main>
-
-    <footer>
-        <p>&copy; 2025 Your AI Assistant. All rights reserved.</p>
-    </footer>
-
+    <div class="chat-container">
+        <div class="chat-header">
+            <h1>DeepSeek Chat</h1>
+        </div>
+        <div class="chat-messages" id="chatMessages"></div>
+        <div class="chat-input">
+            <textarea id="userInput" placeholder="Type your message..."></textarea>
+            <button id="sendButton">Send</button>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/openai@4.0.0/dist/openai.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
